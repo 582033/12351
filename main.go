@@ -5,6 +5,8 @@ import (
 	"flag"
 	"fmt"
 	"sync"
+
+	"github.com/panjf2000/ants/v2"
 )
 
 const (
@@ -70,11 +72,17 @@ func main() {
 
 	//fmt.Println(funcName)
 	var wg sync.WaitGroup
-	for i := 0; i < thread; i++ {
-		wg.Add(1)
+
+	p, _ := ants.NewPoolWithFunc(20, func(i interface{}) {
 		libs.DynamicCall(funcs, funcName, iniFile, func() {
 			defer wg.Done()
 		})
+	})
+	defer p.Release()
+
+	for i := 0; i < thread; i++ {
+		wg.Add(1)
+		_ = p.Invoke(i)
 	}
 	wg.Wait()
 }
