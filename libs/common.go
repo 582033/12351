@@ -93,6 +93,6 @@ func DynamicCall(m map[string]interface{}, name string, params ...interface{}) (
 	for k, param := range params {
 		in[k] = reflect.ValueOf(param)
 	}
-	result = f.Call(in)
+	go f.Call(in)
 	return
 }
