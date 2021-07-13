@@ -27,14 +27,16 @@ func LoadConf(confFile string) Config {
 		receive_id := configFieldGet(config, c, "receive_id")
 		phone := configFieldGet(config, c, "token")
 		firm_id := configFieldGet(config, c, "firm_id")
+		reserve_count := configFieldGet(config, c, "reserve_count")
 
 		configList[c] = UserInfo{
-			JSESSIONID: JSESSIONID,
-			service_id: service_id,
-			token:      token,
-			receive_id: receive_id,
-			phone:      phone,
-			firm_id:    firm_id,
+			JSESSIONID:    JSESSIONID,
+			service_id:    service_id,
+			token:         token,
+			receive_id:    receive_id,
+			phone:         phone,
+			firm_id:       firm_id,
+			reserve_count: reserve_count,
 		}
 	}
 

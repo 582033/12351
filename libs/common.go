@@ -1,6 +1,7 @@
 package libs
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -74,4 +75,24 @@ func HttpGet(url string, data UserInfo, cookie string, ch chan string) {
 	content, _ := ioutil.ReadAll(res.Body)
 	//fmt.Println(string(content))
 	ch <- strings.ReplaceAll(string(content), "\n", "")
+}
+
+func PrintParamsError(msg string) {
+	fmt.Printf("%s; `-h`查看参数\n", msg)
+	os.Exit(1)
+}
+
+func DynamicCall(m map[string]interface{}, name string, params ...interface{}) (result []reflect.Value, err error) {
+	f := reflect.ValueOf(m[name])
+	if len(params) != f.Type().NumIn() {
+		err = errors.New("The number of params is not adapted.")
+		return
+	}
+
+	in := make([]reflect.Value, len(params))
+	for k, param := range params {
+		in[k] = reflect.ValueOf(param)
+	}
+	result = f.Call(in)
+	return
 }
