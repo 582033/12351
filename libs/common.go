@@ -7,25 +7,26 @@ import (
 	"os"
 	"reflect"
 	"strings"
-
-	"gopkg.in/ini.v1"
 )
 
-type UserInfo struct {
-	JSESSIONID    string
-	service_id    string
-	token         string
-	receive_id    string
-	phone         string
-	firm_id       string
-	reserve_count string
-}
+type (
+	Config   map[string]UserInfo
+	UserInfo struct {
+		JSESSIONID    string
+		service_id    string
+		token         string
+		receive_id    string
+		phone         string
+		firm_id       string
+		reserve_count string
+	}
+)
 
 func CheckFile(file string) bool {
 	isExist := true
 	_, err := os.Stat(file)
 	if err != nil {
-		isExist = true
+		isExist = false
 	}
 	return isExist
 }
@@ -46,25 +47,7 @@ func StructToUrlParams(foo UserInfo) string {
 	return params
 }
 
-func LoadConf(file string, section string) UserInfo {
-	cfg, err := ini.Load(file)
-	if err != nil {
-		panic(err)
-	}
-
-	conf := UserInfo{
-		JSESSIONID:    cfg.Section(section).Key("JSESSIONID").String(),
-		service_id:    cfg.Section(section).Key("service_id").String(),
-		token:         cfg.Section(section).Key("token").String(),
-		receive_id:    cfg.Section(section).Key("receive_id").String(),
-		phone:         cfg.Section(section).Key("phone").String(),
-		firm_id:       cfg.Section(section).Key("firm_id").String(),
-		reserve_count: "1",
-	}
-	return conf
-}
-
-func HttpGet(url string, data UserInfo, cookie string) string {
+func HttpGet(url string, data UserInfo, cookie string, ch chan string) {
 	params := StructToUrlParams(data)
 	//fmt.Println(params)
 
@@ -90,5 +73,5 @@ func HttpGet(url string, data UserInfo, cookie string) string {
 	defer res.Body.Close()
 	content, _ := ioutil.ReadAll(res.Body)
 	//fmt.Println(string(content))
-	return strings.ReplaceAll(string(content), "\n", "")
+	ch <- strings.ReplaceAll(string(content), "\n", "")
 }
