@@ -47,6 +47,7 @@ func snapUp(iniFile string, callBack func()) {
 var t = flag.Int("t", 1, "并发线程数")
 var i = flag.String("i", "./conf.ini", "配置文件ini位置")
 var s = flag.String("s", "snapUp", "- snapUp, 抢购\n- signIn, 抢购成功后的扫码确认")
+var p = flag.Int("p", 100, "线程池大小")
 
 func main() {
 	flag.Parse()
@@ -54,6 +55,8 @@ func main() {
 	thread := *t
 	iniFile := *i
 	funcName := *s
+	poolSize := *p
+
 	funcs := map[string]interface{}{
 		"signIn": signIn,
 		"snapUp": snapUp,
@@ -65,6 +68,9 @@ func main() {
 	if iniFile == "" {
 		libs.PrintParamsError("配置文件路径错误")
 	}
+	if poolSize < 1 {
+		libs.PrintParamsError("线程池大小错误")
+	}
 
 	if funcs[funcName] == nil {
 		libs.PrintParamsError(fmt.Sprintf("不支持的参数`%s`", funcName))
@@ -73,7 +79,7 @@ func main() {
 	//fmt.Println(funcName)
 	var wg sync.WaitGroup
 
-	p, _ := ants.NewPoolWithFunc(20, func(i interface{}) {
+	p, _ := ants.NewPoolWithFunc(poolSize, func(i interface{}) {
 		libs.DynamicCall(funcs, funcName, iniFile, func() {
 			defer wg.Done()
 		})
